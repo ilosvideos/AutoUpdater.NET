@@ -60,6 +60,7 @@
     <Compile Include="RemindLaterForm.Designer.cs">
       <DependentUpon>RemindLaterForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="UpdateDownloader.cs" />
     <Compile Include="UpdateForm.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -96,6 +96,17 @@ namespace AutoUpdaterDotNET
         public static event CheckForUpdateEventHandler CheckForUpdateEvent;
 
         /// <summary>
+        ///     A delegate type for hooking up download progress notifications.
+        /// </summary>
+        /// <param name="args">Download progress args.</param>
+        public delegate void DownloadProgressChangedEventHandler(DownloadProgressChangedEventArgs args);
+
+        /// <summary>
+        ///     An event that clients can use to monitor download progress
+        /// </summary>
+        public static event DownloadProgressChangedEventHandler DownloadProgressChanged;
+
+        /// <summary>
         ///     Start checking for new version of application and display dialog to the user if update is available.
         /// </summary>
         public static void Start()
@@ -328,6 +339,20 @@ namespace AutoUpdaterDotNET
             catch (TargetInvocationException)
             {
             }
+        }
+
+        public static void DownloadUpdateBackground()
+        {
+            var updateDownloader = new UpdateDownloader(DownloadURL);
+
+            UpdateDownloader.DownloadProgressChanged += UpdateDownloader_DownloadProgressChanged;
+
+            updateDownloader.Start();
+        }
+
+        private static void UpdateDownloader_DownloadProgressChanged(DownloadProgressChangedEventArgs args)
+        {
+            DownloadProgressChanged?.Invoke(args);
         }
     }
 
