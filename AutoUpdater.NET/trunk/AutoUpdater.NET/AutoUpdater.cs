@@ -177,12 +177,18 @@ namespace AutoUpdaterDotNET
             {
                 webResponse = webRequest.GetResponse();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 if (CheckForUpdateEvent != null)
                 {
-                    CheckForUpdateEvent(null);
+					var updateArgs = new UpdateInfoEventArgs
+					{
+						UpdateException = ex
+					};
+
+                    CheckForUpdateEvent(updateArgs);
                 }
+
                 return;
             }
 
@@ -198,7 +204,12 @@ namespace AutoUpdaterDotNET
             {
                 if (CheckForUpdateEvent != null)
                 {
-                    CheckForUpdateEvent(null);
+					var updateArgs = new UpdateInfoEventArgs
+					{
+						UpdateException = new Exception("Failed to load appcast while updating.")
+					};
+
+					CheckForUpdateEvent(updateArgs);
                 }
                 return;
             }
@@ -385,5 +396,10 @@ namespace AutoUpdaterDotNET
         ///     Returns version of the application currently installed on the user's PC.
         /// </summary>
         public Version InstalledVersion { get; set; }
-    }
+
+		/// <summary>
+		///     If the updater throws an exception
+		/// </summary>
+		public Exception UpdateException { get; set; }
+	}
 }

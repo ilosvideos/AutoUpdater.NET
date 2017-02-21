@@ -33,9 +33,9 @@ namespace AutoUpdaterDotNET
 
             var uri = new Uri(_downloadURL);
 
-            _tempPath = Path.Combine(Path.GetTempPath(), GetFileName(_downloadURL));
+			_tempPath = Path.Combine(Path.GetTempPath(), GetFileName(_downloadURL));
 
-            _webClient.DownloadProgressChanged += OnDownloadProgressChanged;
+	        _webClient.DownloadProgressChanged += OnDownloadProgressChanged;
 
             _webClient.DownloadFileCompleted += OnDownloadComplete;
 
@@ -117,9 +117,14 @@ namespace AutoUpdaterDotNET
                 }
                 return fileName;
             }
-            catch (WebException)
+            catch (WebException ex)
             {
-                return GetFileName(url, "GET");
+	            if (httpWebRequestMethod != "GET")
+	            {
+					return GetFileName(url, "GET");
+				}
+
+	            throw ex;
             }
         }
 
