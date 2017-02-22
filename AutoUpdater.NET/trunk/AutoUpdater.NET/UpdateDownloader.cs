@@ -15,12 +15,13 @@ namespace AutoUpdaterDotNET
         
         public static event DownloadProgressChangedEventHandler DownloadProgressChanged;
 
-
         private readonly string _downloadURL;
 
         private string _tempPath;
 
         private WebClient _webClient;
+
+	    public IWebProxy CustomProxy;
 
         public UpdateDownloader(string downloadURL)
         {
@@ -31,9 +32,14 @@ namespace AutoUpdaterDotNET
         {
             _webClient = new WebClient();
 
+	        if (CustomProxy != null)
+	        {
+		        _webClient.Proxy = CustomProxy;
+	        }
+
             var uri = new Uri(_downloadURL);
 
-			_tempPath = Path.Combine(Path.GetTempPath(), GetFileName(_downloadURL));
+			_tempPath = Path.Combine(Path.GetTempPath(), GetFileName(_downloadURL, CustomProxy));
 
 	        _webClient.DownloadProgressChanged += OnDownloadProgressChanged;
 
@@ -74,7 +80,7 @@ namespace AutoUpdaterDotNET
             }
         }
 
-        private static string GetFileName(string url, string httpWebRequestMethod = "HEAD")
+        private static string GetFileName(string url, IWebProxy customProxy, string httpWebRequestMethod = "HEAD")
         {
             try
             {
@@ -86,7 +92,13 @@ namespace AutoUpdaterDotNET
                     httpWebRequest.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
                     httpWebRequest.Method = httpWebRequestMethod;
                     httpWebRequest.AllowAutoRedirect = false;
-                    var httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
+
+					if (customProxy != null)
+	                {
+		                httpWebRequest.Proxy = customProxy;
+	                }
+
+					var httpWebResponse = (HttpWebResponse)httpWebRequest.GetResponse();
                     if (httpWebResponse.StatusCode.Equals(HttpStatusCode.Redirect) ||
                         httpWebResponse.StatusCode.Equals(HttpStatusCode.Moved) ||
                         httpWebResponse.StatusCode.Equals(HttpStatusCode.MovedPermanently))
@@ -94,7 +106,7 @@ namespace AutoUpdaterDotNET
                         if (httpWebResponse.Headers["Location"] != null)
                         {
                             var location = httpWebResponse.Headers["Location"];
-                            fileName = GetFileName(location);
+                            fileName = GetFileName(location, customProxy);
                             return fileName;
                         }
                     }
@@ -121,7 +133,7 @@ namespace AutoUpdaterDotNET
             {
 	            if (httpWebRequestMethod != "GET")
 	            {
-					return GetFileName(url, "GET");
+					return GetFileName(url, customProxy, "GET");
 				}
 
 	            throw ex;

@@ -57,10 +57,15 @@ namespace AutoUpdaterDotNET
         /// </summary>
         public static String AppCastURL;
 
-        /// <summary>
-        ///     Opens the download url in default browser if true. Very usefull if you have portable application.
-        /// </summary>
-        public static bool OpenDownloadPage;
+		/// <summary>
+		///     Sets a custom proxy to use if desired
+		/// </summary>
+		public static IWebProxy CustomProxy;
+
+		/// <summary>
+		///     Opens the download url in default browser if true. Very usefull if you have portable application.
+		/// </summary>
+		public static bool OpenDownloadPage;
 
         /// <summary>
         ///     Sets the current culture of the auto update notification window. Set this value if your application supports
@@ -169,7 +174,13 @@ namespace AutoUpdaterDotNET
             InstalledVersion = mainAssembly.GetName().Version;
 
             WebRequest webRequest = WebRequest.Create(AppCastURL);
-            webRequest.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
+
+			if (CustomProxy != null)
+			{
+				webRequest.Proxy = CustomProxy;
+			}
+
+			webRequest.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
 
             WebResponse webResponse;
 
@@ -355,6 +366,7 @@ namespace AutoUpdaterDotNET
         public static void DownloadUpdateBackground()
         {
             var updateDownloader = new UpdateDownloader(DownloadURL);
+	        updateDownloader.CustomProxy = CustomProxy;
 
             UpdateDownloader.DownloadProgressChanged += UpdateDownloader_DownloadProgressChanged;
 
